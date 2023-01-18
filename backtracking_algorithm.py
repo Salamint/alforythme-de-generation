@@ -1,5 +1,9 @@
 import random
 import pygame
+from typing import List, Tuple, TypeVar
+
+
+Coordinates = Tuple[int, int]
 
 
 pygame.init()
@@ -10,18 +14,15 @@ class Stack:
     LIFO: Last In First Out
     """
 
-    def __init__(self, iter__: iter = None):
-        if iter__ is None:
-            iter__ = []
-        self.stack = list(iter__)
-        self.iter = iter(self.stack)
+    _T = TypeVar("_T")
 
-    def get_data(self):
-        data = self.stack[-1]
-        del self.stack[-1]
-        return data
+    def __init__(self):
+        self.stack: 'List[Stack._T]' = []
 
-    def add(self, data):
+    def get_data(self) -> 'Stack._T':
+        return self.stack.pop(-1)
+
+    def add(self, data: 'Stack._T'):
         self.stack.append(data)
 
 
@@ -67,7 +68,7 @@ class Tile:
 
     SIZE = 32
 
-    def __init__(self, coordinates: (int, int)):
+    def __init__(self, coordinates: 'Coordinates'):
         self.image = pygame.Surface((self.SIZE, self.SIZE))
         self.rect = pygame.Rect(*[c * self.SIZE for c in coordinates], self.SIZE, self.SIZE)
         self.east = True
@@ -90,10 +91,10 @@ class Tile:
 class Tracker:
 
     @staticmethod
-    def is_accessible(tile: Tile) -> bool:
+    def is_accessible(tile: 'Tile') -> bool:
         return tile is not None and not tile.visited
 
-    def __init__(self, maze: Maze, position: (int, int) = None):
+    def __init__(self, maze: 'Maze', position: 'Coordinates' = None):
         self.maze = maze
         if position is None:
             position = (0, 0)
@@ -101,7 +102,7 @@ class Tracker:
         self.history = Stack()
         self.goto(self.maze.tiles.get(position))
 
-    def accessible_neighbor(self, tile: Tile) -> list:
+    def accessible_neighbor(self, tile: 'Tile') -> 'List[Tile]':
         accessible = []
 
         def get(x_, y_):
@@ -132,7 +133,7 @@ class Tracker:
             except IndexError:
                 break
 
-    def goto(self, tile: Tile):
+    def goto(self, tile: 'Tile'):
         tile.visit()
         old = self.maze.tiles.get((self.x, self.y))
         self.history.add(tile)
